@@ -1,14 +1,14 @@
-import { TrendingUp, Calendar, BookCheck } from "lucide-react";
+import { TrendingUp, Clock, BookCheck } from "lucide-react";
 
 export function QuickStats() {
   const stats = [
     { label: "Weekly Average", value: "4.2h", icon: TrendingUp, color: "text-sage" },
-    { label: "Next Deadline", value: "Mar 28", icon: Calendar, color: "text-terracotta" },
+    { label: "Next Unit Mastery", value: "~6 hours", icon: Clock, color: "text-terracotta" },
     { label: "Completed", value: "14 Lessons", icon: BookCheck, color: "text-sage" },
   ];
 
   return (
-    <div className="grid grid-cols-3 gap-4 animate-fade-up" style={{ animationDelay: "400ms" }}>
+    <div className="grid grid-cols-3 gap-4 animate-fade-up" style={{ animationDelay: "100ms" }}>
       {stats.map((stat) => (
         <div
           key={stat.label}
@@ -18,7 +18,7 @@ export function QuickStats() {
             <stat.icon className={`w-5 h-5 ${stat.color}`} strokeWidth={1.8} />
           </div>
           <div>
-            <p className="text-lg font-semibold font-mono text-foreground">{stat.value}</p>
+            <p className="text-lg font-semibold text-foreground">{stat.value}</p>
             <p className="text-[11px] text-muted-foreground">{stat.label}</p>
           </div>
         </div>

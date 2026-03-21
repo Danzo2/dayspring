@@ -1,20 +1,42 @@
 import { useMemo } from "react";
-import { Flame, Clock } from "lucide-react";
+import { Flame } from "lucide-react";
 
 export function LearningHeatmap() {
-  const weeks = 26;
+  const weeks = 16;
   const days = 7;
-  const dayLabels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+  const dayLabels = ["Mon", "", "Wed", "", "Fri", "", "Sun"];
+
+  // Generate month labels for the columns
+  const monthLabels = useMemo(() => {
+    const labels: { label: string; col: number }[] = [];
+    const today = new Date();
+    const startDate = new Date(today);
+    startDate.setDate(startDate.getDate() - weeks * 7);
+
+    let lastMonth = -1;
+    for (let w = 0; w < weeks; w++) {
+      const d = new Date(startDate);
+      d.setDate(d.getDate() + w * 7);
+      const month = d.getMonth();
+      if (month !== lastMonth) {
+        labels.push({
+          label: d.toLocaleString("default", { month: "short" }),
+          col: w,
+        });
+        lastMonth = month;
+      }
+    }
+    return labels;
+  }, []);
 
   const data = useMemo(() => {
     const grid: number[][] = [];
     for (let w = 0; w < weeks; w++) {
       const week: number[] = [];
       for (let d = 0; d < days; d++) {
-        // Generate organic-looking data with streaks
         const base = Math.random();
         const weekendBoost = d >= 5 ? 0.2 : 0;
-        const recentBoost = w > 20 ? 0.3 : 0;
+        const recentBoost = w > 12 ? 0.3 : 0;
         week.push(Math.min(1, base * 0.7 + weekendBoost + recentBoost));
       }
       grid.push(week);
@@ -31,24 +53,49 @@ export function LearningHeatmap() {
   };
 
   return (
-    <div className="bg-card rounded-xl p-5 shadow-card border border-border/30 h-full">
-      <h3 className="text-sm font-medium text-foreground mb-4">
+    <div className="bg-card rounded-xl p-5 shadow-card border border-border/30">
+      <h3 className="text-sm font-medium text-foreground mb-3">
         Progress Heatmap
       </h3>
-      <div className="flex gap-[3px]">
-        {data.map((week, wi) => (
-          <div key={wi} className="flex flex-col gap-[3px]">
-            {week.map((val, di) => (
-              <div
-                key={di}
-                className={`w-[14px] h-[14px] rounded-[3px] ${getColor(val)} transition-sanctuary`}
-                title={`${dayLabels[di]}, week ${wi + 1}`}
-              />
-            ))}
-          </div>
-        ))}
+
+      {/* Month labels */}
+      <div className="flex gap-[3px] ml-8 mb-1">
+        {Array.from({ length: weeks }).map((_, wi) => {
+          const label = monthLabels.find((m) => m.col === wi);
+          return (
+            <div key={wi} className="w-[14px] text-[10px] text-muted-foreground leading-none">
+              {label ? label.label : ""}
+            </div>
+          );
+        })}
       </div>
-      <div className="flex items-center gap-1.5 mt-3 text-[11px] text-muted-foreground">
+
+      {/* Grid with day labels */}
+      <div className="flex gap-0">
+        <div className="flex flex-col gap-[3px] mr-1.5 pt-0">
+          {dayLabels.map((label, i) => (
+            <div key={i} className="h-[14px] flex items-center">
+              <span className="text-[10px] text-muted-foreground w-6 text-right">{label}</span>
+            </div>
+          ))}
+        </div>
+        <div className="flex gap-[3px]">
+          {data.map((week, wi) => (
+            <div key={wi} className="flex flex-col gap-[3px]">
+              {week.map((val, di) => (
+                <div
+                  key={di}
+                  className={`w-[14px] h-[14px] rounded-[3px] ${getColor(val)} transition-sanctuary`}
+                  title={`${dayLabels[di] || "Day"}, week ${wi + 1}`}
+                />
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Legend */}
+      <div className="flex items-center gap-1.5 mt-3 text-[11px] text-muted-foreground ml-8">
         <span>Less</span>
         <div className="w-[14px] h-[14px] rounded-[3px] bg-muted/40" />
         <div className="w-[14px] h-[14px] rounded-[3px] bg-sage/20" />
@@ -57,20 +104,13 @@ export function LearningHeatmap() {
         <div className="w-[14px] h-[14px] rounded-[3px] bg-sage/80" />
         <span>More</span>
       </div>
-      <div className="flex items-center gap-5 mt-4 pt-4 border-t border-border/50">
-        <div className="flex items-center gap-2">
-          <Flame className="w-4 h-4 text-terracotta" strokeWidth={1.8} />
-          <div>
-            <p className="text-xs font-medium text-foreground">12 Days</p>
-            <p className="text-[11px] text-muted-foreground">Current Streak</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <Clock className="w-4 h-4 text-sage" strokeWidth={1.8} />
-          <div>
-            <p className="text-xs font-medium text-foreground">~6 hours</p>
-            <p className="text-[11px] text-muted-foreground">Time to Mastery</p>
-          </div>
+
+      {/* Streak */}
+      <div className="flex items-center gap-2 mt-4 pt-3 border-t border-border/50">
+        <Flame className="w-4 h-4 text-terracotta" strokeWidth={1.8} />
+        <div>
+          <p className="text-xs font-medium text-foreground">12 Days</p>
+          <p className="text-[11px] text-muted-foreground">Current Streak</p>
         </div>
       </div>
     </div>
