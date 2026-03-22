@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { Plus, Trash2, X } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -101,6 +102,15 @@ export function CourseEditorModal({ open, onClose, courseId }: CourseEditorModal
     setDescription("");
     setUnits([defaultUnit()]);
   }, [open, isEditMode, existingCourseData, sortedExistingUnits]);
+
+  useEffect(() => {
+    if (!open) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [open]);
 
   const uploadFile = async (courseRowId: string, section: DraftSection) => {
     if (!section.file || !user) return section.contentUrl.trim();
@@ -314,14 +324,14 @@ export function CourseEditorModal({ open, onClose, courseId }: CourseEditorModal
 
   if (!open) return null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center p-4 sm:p-6">
+  return createPortal(
+    <div className="fixed inset-0 z-[1200]">
       <button
         aria-label="Close modal"
-        className="absolute inset-0 bg-background/50 backdrop-blur-md"
+        className="absolute inset-0 bg-background/55 backdrop-blur-md"
         onClick={onClose}
       />
-      <div className="relative w-full max-w-4xl bg-card rounded-2xl border border-border/40 shadow-card-hover max-h-[92vh] overflow-y-auto">
+      <div className="absolute inset-x-4 top-4 bottom-4 z-[1210] mx-auto w-[min(96vw,1220px)] bg-card rounded-2xl border border-border/40 shadow-card-hover overflow-y-auto">
         <div className="sticky top-0 bg-card/95 backdrop-blur px-6 py-4 border-b border-border/40 flex items-center justify-between">
           <div>
             <h2 className="text-lg font-medium text-foreground">
@@ -531,6 +541,7 @@ export function CourseEditorModal({ open, onClose, courseId }: CourseEditorModal
           </Button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
