@@ -1,6 +1,6 @@
 import { Code2, Pen, Megaphone, Brain } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
-import { useCourseMasteryStats, useCourses } from "@/hooks/useDashboardData";
+import { useCourseProgressByCourse, useCourses } from "@/hooks/useDashboardData";
 import { type LucideIcon } from "lucide-react";
 
 const iconMap: Record<string, LucideIcon> = {
@@ -15,42 +15,39 @@ const colorPairs = [
   { iconColor: "text-terracotta", iconBg: "bg-terracotta-light" },
 ];
 
-// Fallback hardcoded courses for when DB is empty
-const fallbackCourses = [
-  { icon: Code2, iconColor: "text-sage", iconBg: "bg-sage-light", category: "AI Strategy", title: "Advanced Prompt Engineering", progress: 75 },
-  { icon: Pen, iconColor: "text-terracotta", iconBg: "bg-terracotta-light", category: "Design", title: "UX Research Methods", progress: 42 },
-  { icon: Megaphone, iconColor: "text-sage", iconBg: "bg-sage-light", category: "Development", title: "Context Window Mastery", progress: 88 },
-  { icon: Brain, iconColor: "text-terracotta", iconBg: "bg-terracotta-light", category: "Research", title: "Evaluation Frameworks", progress: 31 },
-];
-
 export function ActiveCourses() {
   const { data: courses } = useCourses();
-  const { data: mastery } = useCourseMasteryStats();
+  const { data: progressByCourse } = useCourseProgressByCourse();
 
   const hasCourses = courses && courses.length > 0;
 
   const courseCards = hasCourses
     ? courses.map((c, i) => {
-        const stats = mastery?.find((m) => m.course_id === c.id);
         const IconComp = iconMap[c.icon_name ?? ""] ?? Code2;
         const colors = colorPairs[i % colorPairs.length];
         return {
+          id: c.id,
           icon: IconComp,
           ...colors,
           category: c.category ?? "Course",
           title: c.title,
-          progress: stats?.completion_percentage ?? 0,
+          progress: progressByCourse?.[c.id] ?? 0,
         };
       })
-    : fallbackCourses;
+    : [];
 
   return (
     <section className="animate-fade-up" style={{ animationDelay: "200ms" }}>
       <h2 className="text-base font-medium text-foreground mb-4">Active Courses</h2>
+      {!hasCourses && (
+        <div className="bg-card rounded-xl p-8 shadow-card border border-border/30 text-center">
+          <p className="text-sm text-muted-foreground">No active courses yet.</p>
+        </div>
+      )}
       <div className="grid grid-cols-4 gap-4">
         {courseCards.map((course) => (
           <div
-            key={course.title}
+            key={course.id}
             className="bg-card rounded-xl p-5 shadow-card border border-border/30 hover:shadow-card-hover hover:-translate-y-1 transition-sanctuary cursor-pointer group"
           >
             <div className="flex items-start justify-between mb-4">

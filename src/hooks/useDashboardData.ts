@@ -32,6 +32,63 @@ export function useCourseMasteryStats() {
   });
 }
 
+export function useCourseProgressByCourse() {
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: ["course_progress_by_course", user?.id],
+    queryFn: async () => {
+      const [{ data: units, error: unitsError }, { data: sections, error: sectionsError }, { data: progress, error: progressError }] =
+        await Promise.all([
+          supabase.from("units").select("id, course_id"),
+          supabase.from("sections").select("id, unit_id"),
+          supabase.from("user_progress").select("section_id, is_completed").eq("user_id", user!.id),
+        ]);
+
+      if (unitsError) throw unitsError;
+      if (sectionsError) throw sectionsError;
+      if (progressError) throw progressError;
+
+      const unitToCourse = new Map<string, string>();
+      units.forEach((unit) => {
+        if (unit.course_id) {
+          unitToCourse.set(unit.id, unit.course_id);
+        }
+      });
+
+      const sectionToCourse = new Map<string, string>();
+      const totalsByCourse: Record<string, { total: number; completed: number }> = {};
+
+      sections.forEach((section) => {
+        if (!section.unit_id) return;
+        const courseId = unitToCourse.get(section.unit_id);
+        if (!courseId) return;
+
+        sectionToCourse.set(section.id, courseId);
+        if (!totalsByCourse[courseId]) {
+          totalsByCourse[courseId] = { total: 0, completed: 0 };
+        }
+        totalsByCourse[courseId].total += 1;
+      });
+
+      progress.forEach((entry) => {
+        if (!entry.is_completed || !entry.section_id) return;
+        const courseId = sectionToCourse.get(entry.section_id);
+        if (!courseId || !totalsByCourse[courseId]) return;
+        totalsByCourse[courseId].completed += 1;
+      });
+
+      const progressByCourse: Record<string, number> = {};
+      Object.entries(totalsByCourse).forEach(([courseId, stats]) => {
+        progressByCourse[courseId] =
+          stats.total > 0 ? Math.round((stats.completed / stats.total) * 100) : 0;
+      });
+
+      return progressByCourse;
+    },
+    enabled: !!user,
+  });
+}
+
 export function useLearningSessionsThisWeek() {
   const { user } = useAuth();
   return useQuery({

@@ -9,13 +9,6 @@ const contentTypeIcons: Record<string, { icon: LucideIcon; color: string }> = {
   reading: { icon: BookOpen, color: "text-sage" },
 };
 
-const fallbackItems = [
-  { icon: FileText, iconColor: "text-terracotta", title: "Prompt Patterns Cheatsheet.pdf", subtitle: "Advanced Prompt Engineering • Module 3" },
-  { icon: PlayCircle, iconColor: "text-sage", title: "Introduction to Chain-of-Thought", subtitle: "Context Window Mastery • Module 2" },
-  { icon: HelpCircle, iconColor: "text-terracotta", title: "Evaluation Frameworks Quiz", subtitle: "Evaluation Frameworks • Module 1" },
-  { icon: BookOpen, iconColor: "text-sage", title: "Research Methodology Guide", subtitle: "UX Research Methods • Module 4" },
-];
-
 export function RecentlyAccessed() {
   const { data: recent } = useRecentlyAccessed();
 
@@ -35,11 +28,14 @@ export function RecentlyAccessed() {
           subtitle: `${courseTitle}${unitTitle ? ` • ${unitTitle}` : ""}`,
         };
       })
-    : fallbackItems;
+    : [];
 
   return (
     <div className="bg-card rounded-xl p-5 shadow-card border border-border/30">
       <h3 className="text-sm font-medium text-foreground mb-3">Recently Accessed</h3>
+      {!hasData && (
+        <p className="text-sm text-muted-foreground">No recently accessed sections yet.</p>
+      )}
       <div className="space-y-1">
         {items.map((item) => (
           <button
