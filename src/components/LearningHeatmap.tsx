@@ -1,12 +1,27 @@
 import { useMemo } from "react";
 import { Flame } from "lucide-react";
+import { useLearningSessionsRange } from "@/hooks/useDashboardData";
+import { useAuth } from "@/hooks/useAuth";
 
 export function LearningHeatmap() {
   const weeks = 16;
   const days = 7;
   const dayLabels = ["Mon", "", "Wed", "", "Fri", "", "Sun"];
 
-  // Generate month labels for the columns
+  const { data: sessions } = useLearningSessionsRange(weeks * 7);
+  const { profile } = useAuth();
+  const streak = (profile as any)?.current_streak ?? 0;
+
+  // Build lookup of date -> total minutes
+  const sessionMap = useMemo(() => {
+    const map: Record<string, number> = {};
+    sessions?.forEach((s) => {
+      const d = s.activity_date ?? "";
+      map[d] = (map[d] ?? 0) + s.duration_minutes;
+    });
+    return map;
+  }, [sessions]);
+
   const monthLabels = useMemo(() => {
     const labels: { label: string; col: number }[] = [];
     const today = new Date();
@@ -29,26 +44,34 @@ export function LearningHeatmap() {
     return labels;
   }, []);
 
-  const data = useMemo(() => {
-    const grid: number[][] = [];
+  const { data: gridData, maxMinutes } = useMemo(() => {
+    const grid: { date: string; minutes: number }[][] = [];
+    const today = new Date();
+    const startDate = new Date(today);
+    startDate.setDate(startDate.getDate() - weeks * 7);
+    let maxMin = 1;
+
     for (let w = 0; w < weeks; w++) {
-      const week: number[] = [];
+      const week: { date: string; minutes: number }[] = [];
       for (let d = 0; d < days; d++) {
-        const base = Math.random();
-        const weekendBoost = d >= 5 ? 0.2 : 0;
-        const recentBoost = w > 12 ? 0.3 : 0;
-        week.push(Math.min(1, base * 0.7 + weekendBoost + recentBoost));
+        const date = new Date(startDate);
+        date.setDate(date.getDate() + w * 7 + d);
+        const dateStr = date.toISOString().split("T")[0];
+        const mins = sessionMap[dateStr] ?? 0;
+        if (mins > maxMin) maxMin = mins;
+        week.push({ date: dateStr, minutes: mins });
       }
       grid.push(week);
     }
-    return grid;
-  }, []);
+    return { data: grid, maxMinutes: maxMin };
+  }, [sessionMap]);
 
-  const getColor = (val: number) => {
-    if (val < 0.1) return "bg-muted/40";
-    if (val < 0.3) return "bg-sage/20";
-    if (val < 0.5) return "bg-sage/40";
-    if (val < 0.7) return "bg-sage/60";
+  const getColor = (minutes: number) => {
+    if (minutes === 0) return "bg-muted/40";
+    const ratio = minutes / maxMinutes;
+    if (ratio < 0.25) return "bg-sage/20";
+    if (ratio < 0.5) return "bg-sage/40";
+    if (ratio < 0.75) return "bg-sage/60";
     return "bg-sage/80";
   };
 
@@ -80,13 +103,13 @@ export function LearningHeatmap() {
           ))}
         </div>
         <div className="flex gap-[3px]">
-          {data.map((week, wi) => (
+          {gridData.map((week, wi) => (
             <div key={wi} className="flex flex-col gap-[3px]">
-              {week.map((val, di) => (
+              {week.map((cell, di) => (
                 <div
                   key={di}
-                  className={`w-[14px] h-[14px] rounded-[3px] ${getColor(val)} transition-sanctuary`}
-                  title={`${dayLabels[di] || "Day"}, week ${wi + 1}`}
+                  className={`w-[14px] h-[14px] rounded-[3px] ${getColor(cell.minutes)} transition-sanctuary`}
+                  title={`${cell.date}: ${cell.minutes} min`}
                 />
               ))}
             </div>
@@ -109,7 +132,7 @@ export function LearningHeatmap() {
       <div className="flex items-center gap-2 mt-4 pt-3 border-t border-border/50">
         <Flame className="w-4 h-4 text-terracotta" strokeWidth={1.8} />
         <div>
-          <p className="text-xs font-medium text-foreground">12 Days</p>
+          <p className="text-xs font-medium text-foreground">{streak} Days</p>
           <p className="text-[11px] text-muted-foreground">Current Streak</p>
         </div>
       </div>

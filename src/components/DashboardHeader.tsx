@@ -1,11 +1,18 @@
 import { Search, Bell } from "lucide-react";
+import { useCourseMasteryStats } from "@/hooks/useDashboardData";
 
 interface DashboardHeaderProps {
   name: string;
-  unitsRemaining: number;
+  unitsRemaining?: number;
 }
 
 export function DashboardHeader({ name, unitsRemaining }: DashboardHeaderProps) {
+  const { data: mastery } = useCourseMasteryStats();
+
+  const remaining = mastery
+    ? mastery.reduce((s, c) => s + (c.remaining_sections ?? 0), 0)
+    : unitsRemaining ?? 0;
+
   return (
     <header className="flex items-start justify-between mb-8 animate-fade-up" style={{ animationDelay: "100ms" }}>
       <div>
@@ -13,7 +20,7 @@ export function DashboardHeader({ name, unitsRemaining }: DashboardHeaderProps) 
           Welcome Back, {name}.
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          You have {unitsRemaining} units to complete this week. Stay focused.
+          You have {remaining} units to complete this week. Stay focused.
         </p>
       </div>
       <div className="flex items-center gap-3">
