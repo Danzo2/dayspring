@@ -4,6 +4,7 @@ import { type LucideIcon } from "lucide-react";
 
 const contentTypeIcons: Record<string, { icon: LucideIcon; color: string }> = {
   external_url: { icon: PlayCircle, color: "text-sage" },
+  video: { icon: PlayCircle, color: "text-sage" },
   pdf: { icon: FileText, color: "text-terracotta" },
   quiz: { icon: HelpCircle, color: "text-terracotta" },
   reading: { icon: BookOpen, color: "text-sage" },

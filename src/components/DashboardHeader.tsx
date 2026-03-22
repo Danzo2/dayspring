@@ -1,5 +1,5 @@
 import { Search, Bell } from "lucide-react";
-import { useCourseMasteryStats } from "@/hooks/useDashboardData";
+import { useSectionStats } from "@/hooks/useDashboardData";
 
 interface DashboardHeaderProps {
   name: string;
@@ -7,10 +7,10 @@ interface DashboardHeaderProps {
 }
 
 export function DashboardHeader({ name, unitsRemaining }: DashboardHeaderProps) {
-  const { data: mastery } = useCourseMasteryStats();
+  const { data: sectionStats } = useSectionStats();
 
-  const remaining = mastery
-    ? mastery.reduce((s, c) => s + (c.remaining_sections ?? 0), 0)
+  const remaining = sectionStats
+    ? sectionStats.remainingSections
     : unitsRemaining ?? 0;
 
   return (
@@ -20,7 +20,7 @@ export function DashboardHeader({ name, unitsRemaining }: DashboardHeaderProps) 
           Welcome Back, {name}.
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          You have {remaining} units to complete this week. Stay focused.
+          You have {remaining} sections to complete this week. Stay focused.
         </p>
       </div>
       <div className="flex items-center gap-3">

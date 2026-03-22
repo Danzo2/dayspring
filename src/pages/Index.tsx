@@ -16,21 +16,23 @@ const Index = () => {
     <div className="flex min-h-screen bg-background">
       <DashboardSidebar />
       <main className="flex-1 px-8 py-7 overflow-y-auto">
-        <DashboardHeader name={firstName} unitsRemaining={3} />
+        <DashboardHeader name={firstName} />
         <QuickStats />
         <div className="mt-6">
           <ActiveCourses />
         </div>
-        <div className="grid grid-cols-3 gap-4 mt-6 animate-fade-up" style={{ animationDelay: "300ms" }}>
-          <div className="col-span-2 space-y-4">
+        <div className="grid grid-cols-12 gap-4 mt-6 animate-fade-up" style={{ animationDelay: "300ms" }}>
+          <div className="col-span-8">
             <LearningActivity />
-            <div className="grid grid-cols-2 gap-4">
-              <LearningHeatmap />
-              <SkillGraph />
-            </div>
           </div>
-          <div>
+          <div className="col-span-4">
             <RecentlyAccessed />
+          </div>
+          <div className="col-span-6">
+            <LearningHeatmap />
+          </div>
+          <div className="col-span-6">
+            <SkillGraph />
           </div>
         </div>
       </main>

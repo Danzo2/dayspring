@@ -89,6 +89,53 @@ export function useCourseProgressByCourse() {
   });
 }
 
+export function useSectionStats() {
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: ["section_stats", user?.id],
+    queryFn: async () => {
+      const [{ data: units, error: unitsError }, { data: sections, error: sectionsError }, { data: progress, error: progressError }] =
+        await Promise.all([
+          supabase.from("units").select("id, course_id"),
+          supabase.from("sections").select("id, unit_id, duration_minutes"),
+          supabase.from("user_progress").select("section_id, is_completed").eq("user_id", user!.id),
+        ]);
+
+      if (unitsError) throw unitsError;
+      if (sectionsError) throw sectionsError;
+      if (progressError) throw progressError;
+
+      const validUnitIds = new Set(units.map((u) => u.id));
+      const completedIds = new Set(
+        progress.filter((p) => p.is_completed && p.section_id).map((p) => p.section_id as string)
+      );
+
+      let totalSections = 0;
+      let completedSections = 0;
+      let remainingMinutes = 0;
+
+      sections.forEach((section) => {
+        if (!section.unit_id || !validUnitIds.has(section.unit_id)) return;
+        totalSections += 1;
+        const isCompleted = completedIds.has(section.id);
+        if (isCompleted) {
+          completedSections += 1;
+        } else {
+          remainingMinutes += section.duration_minutes ?? 0;
+        }
+      });
+
+      return {
+        totalSections,
+        completedSections,
+        remainingSections: Math.max(0, totalSections - completedSections),
+        remainingMinutes,
+      };
+    },
+    enabled: !!user,
+  });
+}
+
 export function useLearningSessionsThisWeek() {
   const { user } = useAuth();
   return useQuery({

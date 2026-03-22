@@ -44,7 +44,7 @@ export function DashboardSidebar() {
   const isActive = (path?: string) => path && location.pathname === path;
 
   return (
-    <aside className="w-[260px] min-h-screen bg-surface-alt border-r border-border flex flex-col animate-slide-in-left">
+    <aside className="w-[260px] h-screen overflow-y-auto bg-surface-alt border-r border-border flex flex-col animate-slide-in-left">
       {/* Logo */}
       <div className="px-6 py-7 flex items-center gap-2.5">
         <div className="w-8 h-8 rounded-md bg-terracotta flex items-center justify-center">
