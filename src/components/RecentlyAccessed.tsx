@@ -1,33 +1,42 @@
 import { FileText, PlayCircle, HelpCircle, BookOpen } from "lucide-react";
+import { useRecentlyAccessed } from "@/hooks/useDashboardData";
+import { type LucideIcon } from "lucide-react";
 
-const items = [
-  {
-    icon: FileText,
-    iconColor: "text-terracotta",
-    title: "Prompt Patterns Cheatsheet.pdf",
-    subtitle: "Advanced Prompt Engineering • Module 3",
-  },
-  {
-    icon: PlayCircle,
-    iconColor: "text-sage",
-    title: "Introduction to Chain-of-Thought",
-    subtitle: "Context Window Mastery • Module 2",
-  },
-  {
-    icon: HelpCircle,
-    iconColor: "text-terracotta",
-    title: "Evaluation Frameworks Quiz",
-    subtitle: "Evaluation Frameworks • Module 1",
-  },
-  {
-    icon: BookOpen,
-    iconColor: "text-sage",
-    title: "Research Methodology Guide",
-    subtitle: "UX Research Methods • Module 4",
-  },
+const contentTypeIcons: Record<string, { icon: LucideIcon; color: string }> = {
+  external_url: { icon: PlayCircle, color: "text-sage" },
+  pdf: { icon: FileText, color: "text-terracotta" },
+  quiz: { icon: HelpCircle, color: "text-terracotta" },
+  reading: { icon: BookOpen, color: "text-sage" },
+};
+
+const fallbackItems = [
+  { icon: FileText, iconColor: "text-terracotta", title: "Prompt Patterns Cheatsheet.pdf", subtitle: "Advanced Prompt Engineering • Module 3" },
+  { icon: PlayCircle, iconColor: "text-sage", title: "Introduction to Chain-of-Thought", subtitle: "Context Window Mastery • Module 2" },
+  { icon: HelpCircle, iconColor: "text-terracotta", title: "Evaluation Frameworks Quiz", subtitle: "Evaluation Frameworks • Module 1" },
+  { icon: BookOpen, iconColor: "text-sage", title: "Research Methodology Guide", subtitle: "UX Research Methods • Module 4" },
 ];
 
 export function RecentlyAccessed() {
+  const { data: recent } = useRecentlyAccessed();
+
+  const hasData = recent && recent.length > 0;
+
+  const items = hasData
+    ? recent.map((r) => {
+        const section = r.sections as any;
+        const contentType = section?.content_type ?? "external_url";
+        const mapping = contentTypeIcons[contentType] ?? contentTypeIcons.external_url;
+        const unitTitle = section?.units?.title ?? "";
+        const courseTitle = section?.units?.courses?.title ?? "";
+        return {
+          icon: mapping.icon,
+          iconColor: mapping.color,
+          title: section?.title ?? "Untitled",
+          subtitle: `${courseTitle}${unitTitle ? ` • ${unitTitle}` : ""}`,
+        };
+      })
+    : fallbackItems;
+
   return (
     <div className="bg-card rounded-xl p-5 shadow-card border border-border/30">
       <h3 className="text-sm font-medium text-foreground mb-3">Recently Accessed</h3>

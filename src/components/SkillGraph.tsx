@@ -6,8 +6,9 @@ import {
   PolarRadiusAxis,
   ResponsiveContainer,
 } from "recharts";
+import { useUserSkills } from "@/hooks/useDashboardData";
 
-const data = [
+const fallbackData = [
   { subject: "Context Eng.", score: 18, fullMark: 20 },
   { subject: "Eval & Debug", score: 14, fullMark: 20 },
   { subject: "Tools", score: 16, fullMark: 20 },
@@ -16,11 +17,22 @@ const data = [
 ];
 
 export function SkillGraph() {
+  const { data: skills } = useUserSkills();
+
+  const chartData =
+    skills && skills.length > 0
+      ? skills.map((s) => ({
+          subject: s.skill_name,
+          score: s.score ?? 0,
+          fullMark: 20,
+        }))
+      : fallbackData;
+
   return (
     <div className="bg-card rounded-xl p-5 shadow-card border border-border/30">
       <h3 className="text-sm font-medium text-foreground mb-1">Skill Graph</h3>
       <ResponsiveContainer width="100%" height={200}>
-        <RadarChart data={data} cx="50%" cy="50%" outerRadius="72%">
+        <RadarChart data={chartData} cx="50%" cy="50%" outerRadius="72%">
           <PolarGrid stroke="hsl(var(--border))" strokeWidth={0.8} />
           <PolarAngleAxis
             dataKey="subject"

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useTodayStudyMinutes, useCourses } from "@/hooks/useDashboardData";
 import {
   LayoutDashboard,
   BookOpen,
@@ -12,27 +13,33 @@ import {
   LogOut,
 } from "lucide-react";
 
-const menuItems = [
-  { label: "Overview", icon: LayoutDashboard, path: "/" },
-  {
-    label: "My Courses",
-    icon: BookOpen,
-    children: [{ label: "Applied Prompt Engineering", path: "/courses/prompt-engineering" }],
-  },
-  { label: "OpenClaw Tutor", icon: Bot, path: "/tutor" },
-  { label: "Goals & Tracking", icon: Target, path: "/goals" },
-  { label: "Settings", icon: Settings, path: "/settings" },
-];
-
 export function DashboardSidebar() {
   const [coursesOpen, setCoursesOpen] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
   const { profile, signOut } = useAuth();
-  const studiedHours = 2;
-  const goalHours = 4;
-  const progress = studiedHours / goalHours;
+  const { data: todayMinutes } = useTodayStudyMinutes();
+  const { data: courses } = useCourses();
+
+  const dailyGoal = (profile as any)?.daily_goal_hours ?? 4;
+  const studiedHours = Math.round(((todayMinutes ?? 0) / 60) * 10) / 10;
+  const progress = Math.min(studiedHours / dailyGoal, 1);
   const circumference = 2 * Math.PI * 36;
+
+  const courseChildren = courses && courses.length > 0
+    ? courses.map((c) => ({
+        label: c.title,
+        path: `/courses/${c.id}`,
+      }))
+    : [{ label: "Applied Prompt Engineering", path: "/courses/prompt-engineering" }];
+
+  const menuItems = [
+    { label: "Overview", icon: LayoutDashboard, path: "/" },
+    { label: "My Courses", icon: BookOpen, children: courseChildren },
+    { label: "OpenClaw Tutor", icon: Bot, path: "/tutor" },
+    { label: "Goals & Tracking", icon: Target, path: "/goals" },
+    { label: "Settings", icon: Settings, path: "/settings" },
+  ];
 
   const isActive = (path?: string) => path && location.pathname === path;
 
@@ -121,7 +128,7 @@ export function DashboardSidebar() {
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
               <span className="text-base font-semibold text-foreground">
-                {studiedHours}/{goalHours}
+                {studiedHours}/{dailyGoal}
               </span>
             </div>
           </div>
