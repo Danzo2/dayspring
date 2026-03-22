@@ -28,6 +28,7 @@ export function DashboardSidebar() {
   const [coursesOpen, setCoursesOpen] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
+  const { profile, signOut } = useAuth();
   const studiedHours = 2;
   const goalHours = 4;
   const progress = studiedHours / goalHours;
