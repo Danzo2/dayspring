@@ -7,7 +7,7 @@ import { useCourseWithUnits, useUserProgress } from "@/hooks/useDashboardData";
 export default function CoursePage() {
   const navigate = useNavigate();
   const { courseId } = useParams();
-  const { data: courseData } = useCourseWithUnits(courseId);
+  const { data: courseData, isLoading } = useCourseWithUnits(courseId);
   const { data: progressMap } = useUserProgress();
 
   const course = courseData?.course;
@@ -39,7 +39,7 @@ export default function CoursePage() {
                 {course?.category ?? "Course"}
               </span>
               <h1 className="text-2xl font-medium text-foreground mt-2">
-                {course?.title ?? "Loading..."}
+                {course?.title ?? (isLoading ? "Fetching course..." : "Course not found")}
               </h1>
               <p className="text-sm text-muted-foreground mt-1">
                 {course?.description ?? ""}

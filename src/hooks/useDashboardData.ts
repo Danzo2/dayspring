@@ -207,8 +207,12 @@ export function useCourseWithUnits(courseId?: string) {
         .from("courses")
         .select("*")
         .eq("id", courseId!)
-        .single();
+        .maybeSingle();
       if (courseError) throw courseError;
+
+      if (!course) {
+        return { course: null, units: [] };
+      }
 
       const { data: units, error: unitsError } = await supabase
         .from("units")
