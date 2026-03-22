@@ -9,6 +9,7 @@ import {
   Settings,
   ChevronDown,
   ChevronRight,
+  LogOut,
 } from "lucide-react";
 
 const menuItems = [
