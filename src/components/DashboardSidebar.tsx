@@ -36,7 +36,7 @@ export function DashboardSidebar() {
   const menuItems = [
     { label: "Overview", icon: LayoutDashboard, path: "/" },
     { label: "My Courses", icon: BookOpen, children: courseChildren.length > 0 ? courseChildren : undefined },
-    { label: "OpenClaw Tutor", icon: Bot, path: "/tutor" },
+    { label: "AI Tutor", icon: Bot, path: "/tutor" },
     { label: "Goals & Tracking", icon: Target, path: "/goals" },
     { label: "Settings", icon: Settings, path: "/settings" },
   ];

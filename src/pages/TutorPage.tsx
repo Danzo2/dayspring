@@ -8,10 +8,10 @@ interface Message {
 }
 
 const suggestions = [
-  "Explain chain-of-thought prompting",
-  "How do I manage context windows?",
-  "Quiz me on evaluation frameworks",
-  "What are common prompt anti-patterns?",
+  "Explain this week's topic in simpler terms",
+  "What should I study next?",
+  "Quiz me on what I've covered so far",
+  "Suggest resources for my current course",
 ];
 
 export default function TutorPage() {
@@ -19,7 +19,7 @@ export default function TutorPage() {
     {
       role: "assistant",
       content:
-        "Hi Danny! I'm OpenClaw, your AI learning assistant. I can help you understand course material, quiz you on concepts, or answer questions about prompt engineering. What would you like to explore?",
+        "Hi! I'm your AI learning assistant. I can explain course material, quiz you on concepts, and suggest what to study next. What would you like to explore?",
     },
   ]);
   const [input, setInput] = useState("");
@@ -50,7 +50,7 @@ export default function TutorPage() {
               <Bot className="w-5 h-5 text-sage" strokeWidth={1.8} />
             </div>
             <div>
-              <h1 className="text-lg font-medium text-foreground">OpenClaw Tutor</h1>
+              <h1 className="text-lg font-medium text-foreground">AI Tutor</h1>
               <p className="text-[11px] text-muted-foreground">AI-powered learning assistant</p>
             </div>
           </div>
@@ -106,7 +106,7 @@ export default function TutorPage() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSend()}
-              placeholder="Ask OpenClaw anything..."
+              placeholder="Ask your tutor anything..."
               className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground/50"
             />
             <button

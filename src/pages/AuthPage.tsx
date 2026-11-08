@@ -111,7 +111,7 @@ export default function AuthPage() {
                   id="name"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  placeholder="Danny Bhaskaran"
+                  placeholder="Ada Lovelace"
                   required
                   className="h-11 bg-background/60"
                 />
